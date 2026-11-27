@@ -1,19 +1,11 @@
-# FictiBank V7.2 Corrigida V3
+# FictiBank V7.2 Corrigida V5
 
-Versão corrigida do FictiBank V7.2 para Render + PostgreSQL.
+Backend PostgreSQL para o FictiBank fictício.
 
-## Correção principal
+## Deploy no Render
+- Build: npm install
+- Start: npm start
+- Variável obrigatória: DATABASE_URL
+- Manter public/index.html da versão atual.
 
-Corrigido o erro PostgreSQL `42P08` (`text versus integer`) na criação do lançamento de saldo inicial. O ID do usuário agora é convertido explicitamente para texto ao montar o `tx_code`.
-
-## Render
-
-- Build Command: `npm install`
-- Start Command: `npm start`
-- Environment Variable obrigatória: `DATABASE_URL`
-
-Aponte `DATABASE_URL` para o PostgreSQL do FictiBank.
-
-## Importante
-
-Esta é uma simulação fictícia. Não usa Pix real nem dinheiro real.
+Esta V5 corrige códigos de transação Pix usando crypto.randomUUID() e melhora o cadastro de usuários.
