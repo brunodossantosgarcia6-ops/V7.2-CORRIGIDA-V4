@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FictiBank V7.2</title>
+<style>
+:root{--bg:#f5f3f9;--card:#fff;--ink:#211d2b;--muted:#777080;--purple:#6f2cff;--purple2:#8d5cff;--green:#1b9b62;--red:#d84d63}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+button,input{font:inherit}button{border:0;cursor:pointer}.hidden{display:none!important}
+#app{min-height:100vh}.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(150deg,#4e1fd0,#8c55ff 60%,#efe9ff)}
+.panel{width:min(430px,100%);background:#fff;border-radius:28px;padding:28px;box-shadow:0 25px 70px #2b165533}.brand{font-size:34px;font-weight:900;color:var(--purple)}.sub{color:var(--muted);margin:6px 0 24px}
+label{font-size:13px;font-weight:800;display:block;margin:14px 0 7px}input{width:100%;padding:14px 15px;border:1px solid #ded9e7;border-radius:14px;outline:0;background:#fff}input:focus{border-color:var(--purple)}
+.primary{width:100%;padding:14px;border-radius:14px;background:linear-gradient(100deg,var(--purple),var(--purple2));color:#fff;font-weight:900;margin-top:18px}.ghost{background:#eeeaf5;padding:12px 15px;border-radius:13px;font-weight:800}
+.demo{margin-top:18px;padding:13px;border-radius:14px;background:#f5f0ff;font-size:13px;color:#5d4d70}.error{margin-top:12px;color:#b22e49;background:#fff0f3;padding:10px;border-radius:10px}
+.top{background:linear-gradient(120deg,#5b20d8,#8750ff);color:#fff;padding:20px 20px 28px;border-radius:0 0 28px 28px}.toprow{display:flex;justify-content:space-between;align-items:center}.brandSmall{font-weight:900;font-size:20px}.icon{background:#ffffff24;color:#fff;border-radius:12px;padding:10px}.hello{margin-top:25px;font-size:14px;opacity:.85}.balance{font-size:34px;font-weight:900;margin-top:4px}.content{padding:18px;max-width:760px;margin:auto}.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:-3px}.act{background:#fff;border-radius:18px;padding:14px 8px;text-align:center;box-shadow:0 8px 22px #3020400d;font-weight:800;font-size:12px}.act b{display:block;font-size:22px;margin-bottom:4px}.card{background:linear-gradient(135deg,#16131e,#4b2c76);color:#fff;border-radius:22px;padding:22px;min-height:175px;position:relative;overflow:hidden;margin-top:18px;box-shadow:0 15px 35px #20152d30}.card:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:#9b72ff33;right:-70px;top:-50px}.chip{width:42px;height:31px;border-radius:7px;background:linear-gradient(135deg,#d9b65c,#fff0a3);margin-bottom:26px}.cardnum{letter-spacing:3px;font-size:16px}.cardbottom{display:flex;justify-content:space-between;margin-top:22px;font-size:11px;opacity:.9}.section{margin-top:22px}.section h3{margin:0 0 10px}.tx{background:#fff;border-radius:16px;padding:13px;display:flex;justify-content:space-between;align-items:center;margin:8px 0}.txl{display:flex;gap:11px;align-items:center}.dot{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#eee8f8}.desc{font-weight:800;font-size:14px}.date{font-size:11px;color:var(--muted);margin-top:3px}.in{color:var(--green);font-weight:900}.out{color:var(--red);font-weight:900}.empty{text-align:center;color:var(--muted);padding:20px}.modal{position:fixed;inset:0;background:#170d2477;display:grid;place-items:end center;padding:14px;z-index:5}.sheet{width:min(600px,100%);background:#fff;border-radius:24px;padding:20px;max-height:90vh;overflow:auto}.sheet h2{margin-top:0}.row{display:flex;gap:10px}.row>*{flex:1}.close{float:right;background:#eeeaf5;border-radius:50%;width:36px;height:36px}.receipt{text-align:center}.success{font-size:52px}.qr{display:block;max-width:300px;width:100%;margin:18px auto}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#241c2d;color:#fff;padding:12px 17px;border-radius:999px;z-index:9;box-shadow:0 10px 30px #0004}
+.nav{position:sticky;bottom:0;background:#fff;border-top:1px solid #e9e4ef;padding:10px 18px;display:flex;justify-content:space-around}.nav button{background:none;color:#6f6677;font-size:11px;font-weight:800}.nav b{display:block;font-size:20px}.notif{background:#fff0f4;border:1px solid #ffd6df;padding:13px;border-radius:15px;margin-bottom:10px}.notif small{color:var(--muted)}
+@media(max-width:420px){.actions{gap:7px}.act{padding:12px 4px}.balance{font-size:30px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const app=document.getElementById("app");
+let current=JSON.parse(localStorage.getItem("fictibank_user")||"null");
+const brl=n=>Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+function toast(m){const x=document.createElement("div");x.className="toast";x.textContent=m;document.body.appendChild(x);setTimeout(()=>x.remove(),2600)}
+async function api(url,opt={}){const r=await fetch(url,{headers:{"Content-Type":"application/json",...(opt.headers||{})},...opt});let d={};try{d=await r.json()}catch{}if(!r.ok)throw new Error(d.error||"Erro no servidor");return d}
+function login(){app.innerHTML=`<div class="login"><div class="panel">
+<div class="brand">FictiBank</div><div class="sub">Banco 100% fictício • V7.2</div>
+<label>Usuário</label><input id="user" autocomplete="username" placeholder="ex.: bruno">
+<label>Senha</label><input id="pass" type="password" autocomplete="current-password" placeholder="Sua senha">
+<button class="primary" id="enter">Entrar</button><div id="err"></div>
+<div class="demo"><b>Contas de demonstração</b><br>bruno / Bruno*1902<br>irmao / 4321</div>
+<button class="ghost" style="width:100%;margin-top:12px" id="register">Criar conta fictícia</button>
+</div></div>`;
+document.getElementById("enter").onclick=async()=>{try{const d=await api("/api/login",{method:"POST",body:JSON.stringify({username:user.value,password:pass.value})});current=d.user;localStorage.setItem("fictibank_user",JSON.stringify(current));load()}catch(e){err.innerHTML=`<div class="error">${esc(e.message)}</div>`}};
+document.getElementById("register").onclick=register;
+}
+function register(){app.innerHTML=`<div class="login"><div class="panel"><div class="brand">Nova conta</div><div class="sub">Crie um usuário do FictiBank</div>
+<label>Nome</label><input id="name" placeholder="Seu nome"><label>Usuário</label><input id="user" placeholder="ex.: joao"><label>Senha</label><input id="pass" type="password" placeholder="mínimo 4 caracteres">
+<button class="primary" id="create">Criar conta</button><div id="err"></div><button class="ghost" style="width:100%;margin-top:12px" id="back">Voltar</button></div></div>`;
+back.onclick=login;create.onclick=async()=>{try{const d=await api("/api/register",{method:"POST",body:JSON.stringify({displayName:name.value,username:user.value,password:pass.value})});current=d.user;localStorage.setItem("fictibank_user",JSON.stringify(current));toast("Conta criada!");load()}catch(e){err.innerHTML=`<div class="error">${esc(e.message)}</div>`}};
+}
+async function load(){try{const d=await api("/api/account/"+current.id);current=d.user;localStorage.setItem("fictibank_user",JSON.stringify(current));home(d)}catch(e){localStorage.removeItem("fictibank_user");current=null;login()}}
+function home(d){const unread=d.notifications.filter(n=>!n.read).length;const tx=d.transactions;
+app.innerHTML=`<div class="top"><div class="toprow"><div class="brandSmall">FictiBank</div><button class="icon" id="logout">Sair</button></div><div class="hello">Olá, ${esc(d.user.display_name)} 👋</div><div class="balance">${brl(d.user.balance)}</div><div style="opacity:.8;font-size:12px">Chave Pix: ${esc(d.user.pix_key)}</div></div>
+<div class="content"><div class="actions">
+<button class="act" id="pix"><b>↗</b>Pix</button><button class="act" id="qr"><b>▣</b>Meu QR</button><button class="act" id="add"><b>＋</b>Adicionar</button><button class="act" id="card"><b>▰</b>Cartão</button></div>
+<div class="card"><div class="chip"></div><div class="cardnum">•••• •••• •••• 7421</div><div class="cardbottom"><span>${esc(d.user.display_name).toUpperCase()}</span><span>VIRTUAL</span></div></div>
+<div class="section"><h3>Notificações ${unread?`(${unread})`:""}</h3>${unread?d.notifications.filter(n=>!n.read).slice(0,2).map(n=>`<div class="notif"><b>${esc(n.title)}</b><br>${esc(n.message)}<br><small>${new Date(n.created_at).toLocaleString("pt-BR")}</small></div>`).join(""):`<div class="empty">Nenhuma notificação nova.</div>`}</div>
+<div class="section"><h3>Extrato</h3>${tx.length?tx.map(t=>`<div class="tx"><div class="txl"><div class="dot">${t.type==="pix_in"?"↓":t.type==="pix_out"?"↑":"＋"}</div><div><div class="desc">${esc(t.description)}</div><div class="date">${esc(t.counterparty||"")} ${new Date(t.created_at).toLocaleString("pt-BR")}</div></div></div><div class="${t.amount<0?"out":"in"}">${t.amount<0?"-":"+"}${brl(Math.abs(t.amount))}</div></div>`).join(""):`<div class="empty">Nenhuma movimentação.</div>`}</div></div>
+<div class="nav"><button id="refresh"><b>⌂</b>Início</button><button id="alltx"><b>↕</b>Extrato</button><button id="notifs"><b>●</b>Avisos</button><button id="profile"><b>☺</b>Perfil</button></div>`;
+logout.onclick=()=>{localStorage.removeItem("fictibank_user");current=null;login()};pix.onclick=pixModal;qr.onclick=qrModal;add.onclick=addModal;card.onclick=cardModal;refresh.onclick=load;alltx.onclick=()=>showTx(tx);notifs.onclick=()=>showNotifs(d.notifications);profile.onclick=()=>profileModal(d.user)}
+function modal(inner){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="sheet"><button class="close" onclick="this.closest('.modal').remove()">×</button>${inner}</div>`;document.body.appendChild(m);return m}
+async function pixModal(){const users=(await api("/api/users")).users.filter(u=>u.id!==current.id);const m=modal(`<h2>Enviar Pix</h2><label>Chave Pix</label><input id="pk" placeholder="ex.: irmao@fictibank"><label>Valor</label><input id="amt" type="number" min="0.01" step="0.01" placeholder="0,00"><div class="demo">Saldo disponível: <b>${brl(current.balance)}</b></div><button class="primary" id="send">Continuar</button>`);send.onclick=async()=>{try{send.disabled=true;send.textContent="Enviando...";const d=await api("/api/pix",{method:"POST",body:JSON.stringify({fromUserId:current.id,pixKey:pk.value,amount:Number(amt.value)})});m.remove();receipt(d);toast("Pix enviado com sucesso!");await load()}catch(e){send.disabled=false;send.textContent="Continuar";toast(e.message)}}
+function receipt(d){modal(`<div class="receipt"><div class="success">✓</div><h2>Pix enviado!</h2><p><b>${brl(d.amount)}</b></p><p>Para: ${esc(d.receiver.name)}<br>${esc(d.receiver.pixKey)}</p><p style="font-size:12px;color:#777">ID: ${esc(d.txCode)}</p><button class="primary" onclick="this.closest('.modal').remove()">Concluir</button></div>`)}
+async function qrModal(){const d=await api("/api/pix/qr?key="+encodeURIComponent(current.pix_key));modal(`<h2>Meu QR Code Pix</h2><img class="qr" src="${d.qr}"><p style="text-align:center"><b>${esc(current.pix_key)}</b></p><div class="demo">QR Code fictício: ele não se conecta ao Pix real.</div>`)}
+function addModal(){const m=modal(`<h2>Adicionar saldo</h2><div class="demo">Este dinheiro é apenas uma simulação.</div><label>Valor</label><input id="amt" type="number" min="1" step="0.01" placeholder="100"><button class="primary" id="go">Adicionar</button>`);go.onclick=async()=>{try{await api("/api/add-money",{method:"POST",body:JSON.stringify({userId:current.id,amount:Number(amt.value)})});m.remove();toast("Saldo fictício adicionado!");load()}catch(e){toast(e.message)}}}
+function cardModal(){modal(`<h2>Cartão virtual</h2><div class="card"><div class="chip"></div><div class="cardnum">•••• •••• •••• 7421</div><div class="cardbottom"><span>${esc(current.display_name||"CLIENTE").toUpperCase()}</span><span>VIRTUAL</span></div></div><div class="demo">Cartão totalmente fictício para a simulação.</div>`)}
+function showTx(tx){modal(`<h2>Extrato completo</h2>${tx.length?tx.map(t=>`<div class="tx"><div><div class="desc">${esc(t.description)}</div><div class="date">${new Date(t.created_at).toLocaleString("pt-BR")} • ${esc(t.tx_code)}</div></div><div class="${t.amount<0?"out":"in"}">${t.amount<0?"-":"+"}${brl(Math.abs(t.amount))}</div></div>`).join(""):`<div class="empty">Nenhuma movimentação.</div>`}`)}
+function showNotifs(ns){modal(`<h2>Notificações</h2>${ns.length?ns.map(n=>`<div class="notif"><b>${esc(n.title)}</b><br>${esc(n.message)}<br><small>${new Date(n.created_at).toLocaleString("pt-BR")}</small></div>`).join(""):`<div class="empty">Nenhuma notificação.</div>`);api("/api/notifications/read",{method:"POST",body:JSON.stringify({userId:current.id})}).catch(()=>{})}
+function profileModal(u){modal(`<h2>Perfil</h2><p><b>${esc(u.display_name)}</b></p><p>Usuário: ${esc(u.username)}</p><p>Chave Pix: ${esc(u.pix_key)}</p><div class="demo">Conta fictícia • PostgreSQL online</div>`)}
+if(current) load(); else login();
+</script>
+</body>
+</html>
