@@ -1,0 +1,19 @@
+{
+  "name": "fictibank-v7-2-online",
+  "version": "7.2.1",
+  "private": true,
+  "description": "FictiBank V7.2 online - simulador banc\u00e1rio fict\u00edcio com PostgreSQL",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "qrcode": "^1.5.4"
+  }
+}
